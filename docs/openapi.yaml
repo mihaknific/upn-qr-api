@@ -1,0 +1,169 @@
+openapi: 3.0.0
+info:
+  title: UPN QR API
+  description: Platform-independent API for validating and generating UPN QR payment orders (Slovenia ZBS Standard).
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    UpnData:
+      type: object
+      properties:
+        payerName:
+          type: string
+        payerAddress:
+          type: string
+        payerPlace:
+          type: string
+        payerIban:
+          type: string
+        payerRefCode:
+          type: string
+        payerRef:
+          type: string
+        amount:
+          type: string
+          example: "150.00"
+        purposeCode:
+          type: string
+          example: "OTHR"
+        purpose:
+          type: string
+        paymentDate:
+          type: string
+          example: "2026-06-01"
+        recipientIban:
+          type: string
+        recipientRefCode:
+          type: string
+        recipientRef:
+          type: string
+        recipientName:
+          type: string
+        recipientAddress:
+          type: string
+        recipientPlace:
+          type: string
+        dueDate:
+          type: string
+        urgent:
+          type: boolean
+        polog:
+          type: boolean
+        dvig:
+          type: boolean
+        currency:
+          type: string
+          default: "EUR"
+security:
+  - bearerAuth: []
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Server is running
+  /api/validate:
+    post:
+      summary: Validate UPN Data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: Validation result with errors and warnings
+  /api/pdf:
+    post:
+      summary: Generate UPN PDF (210x99mm)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: PDF file binary
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /api/pdf/a4:
+    post:
+      summary: Generate UPN PDF on A4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: PDF file binary
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /api/qr:
+    post:
+      summary: Generate UPN QR code (PNG)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: PNG file binary
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+  /api/batch:
+    post:
+      summary: Batch generate UPN orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nalogi:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/UpnData'
+                merge:
+                  type: boolean
+                  default: true
+                format:
+                  type: string
+                  enum: [exact, a4]
+                  default: exact
+      responses:
+        '200':
+          description: Merged PDF or ZIP archive
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/zip:
+              schema:
+                type: string
+                format: binary

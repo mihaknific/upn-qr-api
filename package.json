@@ -1,0 +1,25 @@
+{
+  "name": "upn-qr-api",
+  "version": "1.0.0",
+  "description": "ZBS UPN QR API strežnik za generiranje in validacijo plačilnih nalogov",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node tests/validator.test.js && node tests/pdf-builder.test.js && node tests/qr-generator.test.js && node tests/api.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/static": "^9.1.3",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "adm-zip": "^0.5.17",
+    "fastify": "^5.8.5",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4"
+  }
+}

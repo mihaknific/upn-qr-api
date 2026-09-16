@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPN QR API - Testni vmesnik</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            margin: 0 0 1rem 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            height: 100%;
+            min-height: 300px;
+            background: rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-area iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>UPN API Tester</h1>
+            <p>Vnesite podatke in API bo zgeneriral uraden PDF nalog po uradnem ZBS standardu.</p>
+            
+            <div class="form-group">
+                <label>Ime Plačnika</label>
+                <input type="text" id="payerName" value="Janez Novak">
+            </div>
+            <div class="form-group">
+                <label>Ime Prejemnika</label>
+                <input type="text" id="recipientName" value="Podjetje d.o.o.">
+            </div>
+            <div class="form-group">
+                <label>IBAN Prejemnika</label>
+                <input type="text" id="recipientIban" value="SI56020170014356205">
+            </div>
+            <div class="form-group">
+                <label>Znesek (EUR)</label>
+                <input type="number" step="0.01" id="amount" value="25.50">
+            </div>
+            <div class="form-group">
+                <label>Namen in koda</label>
+                <input type="text" id="purpose" value="OTHR Plačilo storitev">
+            </div>
+
+            <button class="btn" id="generateBtn">Generiraj PDF</button>
+        </div>
+
+        <div class="card">
+            <h1>Predogled</h1>
+            <div class="preview-area" id="previewArea">
+                <div class="empty-state" id="emptyState">Tukaj se bo prikazal generiran PDF.</div>
+                <iframe id="pdfViewer"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('generateBtn');
+            const emptyState = document.getElementById('emptyState');
+            const pdfViewer = document.getElementById('pdfViewer');
+
+            btn.textContent = 'Generiranje...';
+            btn.disabled = true;
+
+            const payload = {
+                payerName: document.getElementById('payerName').value,
+                payerAddress: 'Neznana ulica 1',
+                payerPlace: '1000 Ljubljana',
+                recipientName: document.getElementById('recipientName').value,
+                recipientIban: document.getElementById('recipientIban').value,
+                recipientRefCode: 'SI00',
+                recipientRef: '000',
+                amount: document.getElementById('amount').value,
+                purposeCode: document.getElementById('purpose').value.substring(0, 4),
+                purpose: document.getElementById('purpose').value.substring(5),
+                paymentDate: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const response = await fetch('/api/pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer dev_secret_key_2026'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    alert('Napaka pri generiranju:\n' + JSON.stringify(err.details || err));
+                    throw new Error('API Error');
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                emptyState.style.display = 'none';
+                pdfViewer.style.display = 'block';
+                pdfViewer.src = url;
+
+            } catch (error) {
+                console.error(error);
+            } finally {
+                btn.textContent = 'Generiraj PDF';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

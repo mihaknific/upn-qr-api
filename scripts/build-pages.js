@@ -11,7 +11,7 @@ await mkdir(output, { recursive: true });
 await cp(path.join(root, 'pages'), output, { recursive: true });
 
 const licenses = [
-    ['qrcode', 'LICENSE'],
+    ['qrcode', 'license'],
     ['dijkstrajs', 'LICENSE.md'],
     ['pdf-lib', 'LICENSE.md'],
     ['@pdf-lib/standard-fonts', 'LICENSE.md'],

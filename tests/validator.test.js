@@ -8,10 +8,10 @@ function test(name, fn) {
     try {
         fn();
         passed++;
-        console.log(`  ✅ ${name}`);
+        console.log(`  OK: ${name}`);
     } catch (e) {
         failed++;
-        console.error(`  ❌ ${name}`);
+        console.error(`  NAPAKA: ${name}`);
         console.error(`     ${e.message}`);
     }
 }
@@ -630,7 +630,7 @@ test('Sumniki: č, š, ž so veljavni v ISO-8859-2', () => {
 });
 
 test('Emoji v imenu placnika: napaka', () => {
-    const r = Validator.validateForm({ ...BASE_VALID, payerName: 'JANEZ 🙂 NOVAK' });
+    const r = Validator.validateForm({ ...BASE_VALID, payerName: `JANEZ \u{1F642} NOVAK` });
     assertHasError(r, 'payerName', 'Emoji ni podprt v ISO-8859-2');
 });
 
@@ -746,9 +746,9 @@ test('recipientCity alias deluje namesto recipientPlace', () => {
 
 console.log('\n═══════════════════════════════════════');
 if (failed > 0) {
-    console.log(`  ❌ ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
+    console.log(`  NAPAKA: ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
     process.exit(1);
 } else {
-    console.log(`  ✅ Vseh ${passed} Validator testov uspešno!`);
+    console.log(`  OK: Vseh ${passed} Validator testov uspešno!`);
 }
 console.log('═══════════════════════════════════════\n');

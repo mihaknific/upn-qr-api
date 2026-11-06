@@ -64,7 +64,7 @@ javno spletno stran.
 
 ### Korak 2: Grafični testni vmesnik
 Ko strežnik teče, v svojem spletnem brskalniku odprite:
-👉 **`http://127.0.0.1:3000`**
+**`http://127.0.0.1:3000`**
 
 V vgrajenem grafičnem vmesniku lahko takoj preizkusite generiranje PDF naloga, UPN QR kode ali SEPA EPC QR kode brez pisanja ukazov.
 V polje **API ključ** vnesite isto vrednost, kot je nastavljena v `API_KEY`
@@ -495,7 +495,7 @@ Pri neveljavnih podatkih API vrne ustrezno HTTP statusno kodo in opis napake v J
 ### Kako delujejo slovenski šumniki (Č, Š, Ž)?
 - Standard ZBS UPN QR predpisuje nabor znakov **ISO-8859-2**.
 - Vsi slovenski šumniki (`Č`, `Š`, `Ž`, `č`, `š`, `ž`) so **popolnoma podprti** v kodi QR in na tiskanem nalogu.
-- Posebni znaki (npr. emojiji `🙂` ali cirilične/azijske pismenke) niso podprti v ISO-8859-2 in jih validator zavrne, da se prepreči izdelava nečitljive QR kode na bančnem okencu ali v mobilni banki.
+- Emojiji ter cirilične in azijske pismenke niso podprti v ISO-8859-2. Validator jih zavrne, da se prepreči izdelava nečitljive QR kode na bančnem okencu ali v mobilni banki.
 
 ### Zakaj je koda modela ločena od sklica?
 V JSON strukturi sta model in sklic ločena v dve polji:

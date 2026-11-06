@@ -10,10 +10,10 @@ async function test(name, fn) {
     try {
         await fn();
         passed++;
-        console.log(`  ✅ ${name}`);
+        console.log(`  OK: ${name}`);
     } catch (e) {
         failed++;
-        console.error(`  ❌ ${name}`);
+        console.error(`  NAPAKA: ${name}`);
         console.error(`     ${e.message}`);
     }
 }
@@ -448,10 +448,10 @@ async function runTests() {
 
     console.log('\n═══════════════════════════════════════');
     if (failed > 0) {
-        console.log(`  ❌ ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
+        console.log(`  NAPAKA: ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
         process.exit(1);
     } else {
-        console.log(`  ✅ Vseh ${passed} API testov uspešno!`);
+        console.log(`  OK: Vseh ${passed} API testov uspešno!`);
     }
     console.log('═══════════════════════════════════════\n');
 

@@ -8,10 +8,10 @@ function test(name, fn) {
     try {
         fn();
         passed++;
-        console.log(`  ✅ ${name}`);
+        console.log(`  OK: ${name}`);
     } catch (e) {
         failed++;
-        console.error(`  ❌ ${name}`);
+        console.error(`  NAPAKA: ${name}`);
         console.error(`     ${e.message}`);
     }
 }
@@ -52,7 +52,7 @@ test('Velike sumniki (ČŠŽ): veljavni ISO-8859-2 znaki', () => {
 });
 
 test('Emoji: vrze napako', () => {
-    assert.throws(() => Utils.encodeIso88592('🙂'), /ni podprt/);
+    assert.throws(() => Utils.encodeIso88592('\u{1F642}'), /ni podprt/);
 });
 
 test('Kitajski znaki: vrze napako', () => {
@@ -86,7 +86,7 @@ test('Sumniki: podprti', () => {
 });
 
 test('Emoji: nepodprt', () => {
-    assert.strictEqual(Utils.hasUnsupportedQrChars('Test 🙂'), true);
+    assert.strictEqual(Utils.hasUnsupportedQrChars(`Test \u{1F642}`), true);
 });
 
 test('Null: ni nepodprtih', () => {
@@ -283,9 +283,9 @@ test('Znesek z vejico: ***150,00', () => {
 
 console.log('\n═══════════════════════════════════════');
 if (failed > 0) {
-    console.log(`  ❌ ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
+    console.log(`  NAPAKA: ${failed}/${passed + failed} testov NEUSPEŠNIH!`);
     process.exit(1);
 } else {
-    console.log(`  ✅ Vseh ${passed} Utils testov uspešno!`);
+    console.log(`  OK: Vseh ${passed} Utils testov uspešno!`);
 }
 console.log('═══════════════════════════════════════\n');

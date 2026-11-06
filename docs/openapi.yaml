@@ -1,0 +1,310 @@
+openapi: 3.0.0
+info:
+  title: UPN QR API
+  description: Platform-independent REST API for validating and generating UPN QR payment orders (Slovenia ZBS Standard) and SEPA EPC QR codes. HTTP API requests use JSON; POST /api/batch accepts up to 500 orders. The default request body limit is 10 MiB and can be changed with BODY_LIMIT. The local browser tester can import CSV files and converts them to JSON before submitting a batch.
+  version: 1.1.0
+servers:
+  - url: http://127.0.0.1:3000
+    description: Lokalni razvojni strežnik
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    UpnData:
+      type: object
+      properties:
+        payerName:
+          type: string
+          maxLength: 33
+          description: Ime in priimek plačnika
+        payerAddress:
+          type: string
+          maxLength: 33
+          description: Ulica in hišna številka plačnika
+        payerCity:
+          type: string
+          maxLength: 33
+          description: Poštna številka in kraj plačnika
+        payerPlace:
+          type: string
+          maxLength: 33
+          description: Alias za payerCity
+        payerIban:
+          type: string
+          description: Slovenski IBAN plačnika (obvezen pri dvigu)
+        payerRefCode:
+          type: string
+          description: Model reference plačnika (npr. SI00)
+        payerRef:
+          type: string
+          description: Sklic plačnika
+        amount:
+          anyOf:
+            - type: string
+            - type: number
+          example: "150.00"
+          description: Znesek v EUR z največ 2 decimalnima mestoma
+        purposeCode:
+          type: string
+          example: "OTHR"
+          description: 4-mestna koda namena po šifrantu ZBS (293 kod)
+        purpose:
+          type: string
+          maxLength: 42
+          description: Namen plačila
+        paymentDate:
+          type: string
+          example: "2026-06-01"
+          description: Datum plačila (YYYY-MM-DD)
+        dueDate:
+          type: string
+          example: "2026-06-15"
+          description: Rok plačila (YYYY-MM-DD)
+        recipientIban:
+          type: string
+          description: SEPA IBAN prejemnika
+        recipientRefCode:
+          type: string
+          description: Model reference prejemnika (npr. SI00, SI12, RF)
+        recipientRef:
+          type: string
+          description: Sklic prejemnika
+        recipientName:
+          type: string
+          maxLength: 33
+          description: Ime / naziv prejemnika
+        recipientAddress:
+          type: string
+          maxLength: 33
+          description: Ulica in hišna številka prejemnika
+        recipientCity:
+          type: string
+          maxLength: 33
+          description: Poštna številka in kraj prejemnika
+        recipientPlace:
+          type: string
+          maxLength: 33
+          description: Alias za recipientCity
+        nujno:
+          type: boolean
+          description: Zastavica za nujno nakazilo
+        urgent:
+          type: boolean
+          description: Alias za nujno
+        polog:
+          type: boolean
+          description: Gotovinsko vplačilo (polog)
+        dvig:
+          type: boolean
+          description: Gotovinsko izplačilo (dvig)
+        humanitarno:
+          type: boolean
+          description: Humanitarno nakazilo
+        mode:
+          type: string
+          enum: [placilo, humanitarno, polog, dvig]
+          description: Eksplicitna nastavitev načina obrazca
+        currency:
+          type: string
+          default: "EUR"
+        epcBic:
+          type: string
+          description: BIC / SWIFT koda za SEPA EPC QR (8 ali 11 znakov)
+        epcInformation:
+          type: string
+          maxLength: 70
+          description: Dodatne informacije za SEPA EPC QR
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Root-level health check for Docker and load balancers
+      security: []
+      responses:
+        '200':
+          description: Strežnik deluje normalno
+  /api/health:
+    get:
+      summary: Preverjanje delovanja strežnika
+      security: []
+      responses:
+        '200':
+          description: Strežnik deluje normalno
+  /api/validate:
+    post:
+      summary: Validacija podatkov UPN plačilnega naloga
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: Rezultat validacije
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        msg:
+                          type: string
+                  warnings:
+                    type: array
+  /api/pdf:
+    post:
+      summary: Generiranje UPN PDF naloga (točna velikost 210 x 99 mm)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: PDF datoteka
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Napaka pri validaciji
+  /api/pdf/a4:
+    post:
+      summary: Generiranje UPN PDF naloga na spodnjem robu A4 lista
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: PDF datoteka na A4 formatu
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Napaka pri validaciji
+  /api/qr:
+    post:
+      summary: Generiranje QR kode (ZBS UPN QR ali SEPA EPC QR)
+      parameters:
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [png, svg]
+            default: png
+          description: Format slike
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [upn, epc]
+            default: upn
+          description: Tip QR kode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: Slika QR kode (PNG ali SVG)
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+        '400':
+          description: Napaka pri validaciji ali izdelavi kode
+  /api/epc-qr:
+    post:
+      summary: Generiranje SEPA EPC QR kode
+      parameters:
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [png, svg]
+            default: png
+          description: Format slike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpnData'
+      responses:
+        '200':
+          description: Slika SEPA EPC QR kode
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+        '400':
+          description: Napaka pri validaciji
+  /api/batch:
+    post:
+      summary: Paketno generiranje več zaporednih UPN nalogov (PDF ali ZIP)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nalogi]
+              properties:
+                nalogi:
+                  type: array
+                  minItems: 1
+                  maxItems: 500
+                  items:
+                    $ref: '#/components/schemas/UpnData'
+                merge:
+                  type: boolean
+                  default: true
+                  description: Če je true, združi v en PDF dokument. Če je false, zapakira ločene PDF datoteke v ZIP.
+                format:
+                  type: string
+                  enum: [exact, a4, a4-triple]
+                  default: exact
+                  description: "exact: 1 nalog na 210x99mm; a4: 1 nalog na dnu A4; a4-triple: 3 nalogi na en A4 list s perforacijo"
+      responses:
+        '200':
+          description: Združen PDF dokument ali ZIP arhiv
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Napaka pri validaciji s podrobnim seznamom napak po računih

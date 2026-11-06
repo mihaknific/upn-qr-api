@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPN QR API - Testni vmesnik</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary: #10b981;
+            --secondary-hover: #059669;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem 1rem;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        label {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-hover);
+        }
+
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            height: 100%;
+            min-height: 480px;
+            background: rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .preview-area iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+            border: none;
+            display: none;
+        }
+
+        .preview-area img {
+            max-width: 80%;
+            max-height: 350px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            background: white;
+            padding: 1rem;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .batch-panel {
+            border-top: 1px solid var(--border);
+            padding-top: 1.2rem;
+        }
+
+        .batch-panel h2 {
+            margin: 0 0 0.45rem;
+            font-size: 1.1rem;
+        }
+
+        .batch-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .batch-panel input[type="file"] {
+            width: 100%;
+        }
+
+        .batch-panel .btn {
+            width: 100%;
+        }
+
+        .batch-status {
+            min-height: 1.4rem;
+            color: var(--text-muted);
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .batch-status[data-state="error"] {
+            color: #fca5a5;
+        }
+
+        .batch-status[data-state="success"] {
+            color: #6ee7b7;
+        }
+
+        .batch-preview {
+            overflow-x: auto;
+            max-height: 220px;
+        }
+
+        .batch-preview table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+
+        .batch-preview th,
+        .batch-preview td {
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .download-link {
+            color: #93c5fd;
+            display: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .batch-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div>
+                <h1>UPN QR API Tester</h1>
+                <p>Generiranje in preizkus UPN QR ter SEPA EPC QR nalogov po standardih ZBS. Privzeti podatki so testni.</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Ime Plačnika</label>
+                    <input type="text" id="payerName" value="TESTNI PLACNIK">
+                </div>
+                <div class="form-group">
+                    <label>Naslov in Kraj Plačnika</label>
+                    <input type="text" id="payerAddress" value="Testna ulica 1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Pošta in Kraj Plačnika</label>
+                <input type="text" id="payerCity" value="1000 Ljubljana">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Naziv Prejemnika</label>
+                    <input type="text" id="recipientName" value="TESTNI PREJEMNIK D.O.O.">
+                </div>
+                <div class="form-group">
+                    <label>Naslov Prejemnika</label>
+                    <input type="text" id="recipientAddress" value="Testna cesta 2">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Pošta in Kraj Prejemnika</label>
+                    <input type="text" id="recipientCity" value="1000 Ljubljana">
+                </div>
+                <div class="form-group">
+                    <label>IBAN Prejemnika</label>
+                    <input type="text" id="recipientIban" value="SI83000000000000000">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Model Sklica</label>
+                    <input type="text" id="recipientRefCode" value="SI00">
+                </div>
+                <div class="form-group">
+                    <label>Sklic Prejemnika</label>
+                    <input type="text" id="recipientRef" value="1234">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Znesek (EUR)</label>
+                    <input type="number" step="0.01" id="amount" value="150.00">
+                </div>
+                <div class="form-group">
+                    <label>Koda Namena</label>
+                    <input type="text" id="purposeCode" value="OTHR">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Namen Plačila</label>
+                <input type="text" id="purpose" value="TESTNI PODATKI - NE PLACAJ">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Format PDF</label>
+                    <select id="pdfFormat">
+                        <option value="exact">210 x 99 mm (Exact UPN)</option>
+                        <option value="a4">A4 (na dnu strani)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>API Ključ</label>
+                    <input type="password" id="apiKey" autocomplete="off" placeholder="Vnesite API ključ">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" id="generatePdfBtn">Generiraj PDF</button>
+                <button class="btn btn-secondary" id="generateQrBtn">Prikaži UPN QR</button>
+            </div>
+            <button class="btn" style="background: #6366f1;" id="generateEpcBtn">Prikaži EPC QR (SEPA)</button>
+
+            <section class="batch-panel" aria-labelledby="batchTitle">
+                <h2 id="batchTitle">Več nalogov iz CSV ali JSON</h2>
+                <p>Datoteka se prebere v tem brskalniku. Podatki se pošljejo samo temu API strežniku, ko izberete izdelavo.</p>
+                <div class="batch-controls">
+                    <div class="form-group">
+                        <label for="sampleFile">Testni primer</label>
+                        <select id="sampleFile">
+                            <option value="primer-batch-3-racuni.csv">CSV – 3 testni nalogi</option>
+                            <option value="primer-batch-3-racuni.json">JSON – 3 testni nalogi</option>
+                            <option value="primer-enojni-nalog.json">JSON – 1 testni nalog</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchFile">Ali izberi datoteko</label>
+                        <input type="file" id="batchFile" accept=".csv,.json,text/csv,application/json">
+                    </div>
+                </div>
+                <div class="batch-controls">
+                    <div class="form-group">
+                        <label for="batchFormat">Postavitev PDF</label>
+                        <select id="batchFormat">
+                            <option value="exact">UPN 210 × 99 mm</option>
+                            <option value="a4">En nalog na dnu A4</option>
+                            <option value="a4-triple">Trije nalogi na A4</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchOutput">Rezultat</label>
+                        <select id="batchOutput">
+                            <option value="pdf">En združen PDF</option>
+                            <option value="zip">ZIP z ločenimi PDF-ji</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" id="loadSampleBtn" type="button">Naloži testni primer</button>
+                    <button class="btn btn-secondary" id="generateBatchBtn" type="button" disabled>Ustvari PDF / ZIP</button>
+                </div>
+                <div class="batch-status" id="batchStatus" role="status" aria-live="polite">Najprej izberi testni primer ali CSV/JSON datoteko.</div>
+                <div class="batch-preview" id="batchPreview"></div>
+                <a class="download-link" id="batchDownload" download>Prevzemi ustvarjeno datoteko</a>
+            </section>
+        </div>
+
+        <div class="card">
+            <h1>Predogled</h1>
+            <div class="preview-area" id="previewArea">
+                <div class="empty-state" id="emptyState">Tukaj se bo prikazal generiran PDF ali QR koda.</div>
+                <iframe id="pdfViewer"></iframe>
+                <img id="qrViewer" alt="QR Koda">
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { parseCsvBatch, parseJsonBatch } from './csv-import.js';
+        function getPayload() {
+            return {
+                payerName: document.getElementById('payerName').value,
+                payerAddress: document.getElementById('payerAddress').value,
+                payerCity: document.getElementById('payerCity').value,
+                recipientName: document.getElementById('recipientName').value,
+                recipientAddress: document.getElementById('recipientAddress').value,
+                recipientCity: document.getElementById('recipientCity').value,
+                recipientIban: document.getElementById('recipientIban').value,
+                recipientRefCode: document.getElementById('recipientRefCode').value,
+                recipientRef: document.getElementById('recipientRef').value,
+                amount: document.getElementById('amount').value,
+                purposeCode: document.getElementById('purposeCode').value,
+                purpose: document.getElementById('purpose').value,
+                paymentDate: new Date().toISOString().split('T')[0]
+            };
+        }
+
+        function getHeaders() {
+            const key = document.getElementById('apiKey').value;
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`
+            };
+        }
+
+        const emptyState = document.getElementById('emptyState');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const qrViewer = document.getElementById('qrViewer');
+
+        async function generateSingle(endpoint, filename, contentType) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(getPayload())
+                });
+                if (!response.ok) {
+                    alert(`Napaka:\n${await responseError(response)}`);
+                    return;
+                }
+                showResult(await response.blob(), filename, contentType);
+            } catch (error) {
+                alert('Napaka pri povezavi: ' + error.message);
+            }
+        }
+
+        document.getElementById('generatePdfBtn').addEventListener('click', async () => {
+            const format = document.getElementById('pdfFormat').value;
+            const endpoint = format === 'a4' ? '/api/pdf/a4' : '/api/pdf';
+            await generateSingle(endpoint, format === 'a4' ? 'upn-nalog-a4.pdf' : 'upn-nalog.pdf', 'application/pdf');
+        });
+
+        document.getElementById('generateQrBtn').addEventListener('click', async () => {
+            await generateSingle('/api/qr', 'upn-qr.png', 'image/png');
+        });
+
+        document.getElementById('generateEpcBtn').addEventListener('click', async () => {
+            await generateSingle('/api/epc-qr', 'epc-qr.png', 'image/png');
+        });
+
+        const batchFileInput = document.getElementById('batchFile');
+        const batchFormat = document.getElementById('batchFormat');
+        const batchOutput = document.getElementById('batchOutput');
+        const batchStatus = document.getElementById('batchStatus');
+        const batchPreview = document.getElementById('batchPreview');
+        const batchDownload = document.getElementById('batchDownload');
+        const generateBatchButton = document.getElementById('generateBatchBtn');
+        const MAX_FILE_SIZE = 2 * 1024 * 1024;
+        let batchItems = [];
+        let previewUrl = null;
+        let downloadUrl = null;
+
+        function setStatus(message, state = '') {
+            batchStatus.textContent = message;
+            batchStatus.dataset.state = state;
+        }
+
+        function clearResult(message = 'Tukaj se bo prikazal generiran PDF ali QR koda.') {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+            previewUrl = null;
+            downloadUrl = null;
+            pdfViewer.removeAttribute('src');
+            qrViewer.removeAttribute('src');
+            pdfViewer.style.display = 'none';
+            qrViewer.style.display = 'none';
+            emptyState.textContent = message;
+            emptyState.style.display = 'block';
+            batchDownload.removeAttribute('href');
+            batchDownload.style.display = 'none';
+        }
+
+        function showResult(blob, filename, contentType) {
+            clearResult();
+            if (contentType === 'application/pdf') {
+                previewUrl = URL.createObjectURL(blob);
+                pdfViewer.src = previewUrl;
+                pdfViewer.style.display = 'block';
+                emptyState.style.display = 'none';
+            } else if (contentType.startsWith('image/')) {
+                previewUrl = URL.createObjectURL(blob);
+                qrViewer.src = previewUrl;
+                qrViewer.style.display = 'block';
+                emptyState.style.display = 'none';
+            } else {
+                emptyState.textContent = `${filename} je ustvarjen. Prenesi ga s povezavo spodaj.`;
+            }
+
+            downloadUrl = URL.createObjectURL(blob);
+            batchDownload.href = downloadUrl;
+            batchDownload.download = filename;
+            batchDownload.textContent = `Prevzemi ${filename}`;
+            batchDownload.style.display = 'inline-block';
+        }
+
+        async function responseError(response) {
+            const text = await response.text();
+            try {
+                return JSON.stringify(JSON.parse(text), null, 2);
+            } catch {
+                return text || `HTTP ${response.status}`;
+            }
+        }
+
+        function renderBatchPreview(items) {
+            batchPreview.replaceChildren();
+            const table = document.createElement('table');
+            const header = document.createElement('tr');
+            for (const label of ['#', 'Plačnik', 'Prejemnik', 'Znesek', 'Sklic']) {
+                const cell = document.createElement('th');
+                cell.textContent = label;
+                header.append(cell);
+            }
+            const thead = document.createElement('thead');
+            thead.append(header);
+            table.append(thead);
+
+            const tbody = document.createElement('tbody');
+            for (const [index, item] of items.slice(0, 5).entries()) {
+                const row = document.createElement('tr');
+                for (const value of [
+                    index + 1,
+                    item.payerName || '',
+                    item.recipientName || '',
+                    item.amount || '',
+                    item.recipientRef || ''
+                ]) {
+                    const cell = document.createElement('td');
+                    cell.textContent = String(value);
+                    row.append(cell);
+                }
+                tbody.append(row);
+            }
+            table.append(tbody);
+            batchPreview.append(table);
+            if (items.length > 5) {
+                const more = document.createElement('p');
+                more.textContent = `Prikazanih je prvih 5 od ${items.length} nalogov.`;
+                batchPreview.append(more);
+            }
+        }
+
+        function setBatchItems(items, filename) {
+            batchItems = items;
+            renderBatchPreview(items);
+            generateBatchButton.disabled = false;
+            setStatus(`Naloženih ${items.length} nalogov iz datoteke ${filename}. API bo pred izdelavo preveril vsa polja.`, 'success');
+            clearResult();
+        }
+
+        function setBatchError(error) {
+            batchItems = [];
+            batchPreview.replaceChildren();
+            generateBatchButton.disabled = true;
+            clearResult();
+            setStatus(error.message, 'error');
+        }
+
+        async function loadSample(filename = document.getElementById('sampleFile').value) {
+            try {
+                const response = await fetch(`/samples/${filename}`);
+                if (!response.ok) throw new Error(`Testnega primera ni mogoče naložiti (HTTP ${response.status}).`);
+                const text = await response.text();
+                const items = filename.endsWith('.csv') ? parseCsvBatch(text) : parseJsonBatch(text);
+                setBatchItems(items, filename);
+                batchFileInput.value = '';
+            } catch (error) {
+                setBatchError(error);
+            }
+        }
+
+        document.getElementById('loadSampleBtn').addEventListener('click', () => loadSample());
+
+        batchFileInput.addEventListener('change', async () => {
+            const file = batchFileInput.files?.[0];
+            if (!file) return;
+            clearResult();
+            try {
+                if (file.size > MAX_FILE_SIZE) throw new Error('Datoteka je prevelika; največja dovoljena velikost je 2 MB.');
+                const text = await file.text();
+                const filename = file.name.toLowerCase();
+                if (!filename.endsWith('.csv') && !filename.endsWith('.json')) {
+                    throw new Error('Izberi datoteko s končnico .csv ali .json.');
+                }
+                const items = filename.endsWith('.csv')
+                    ? parseCsvBatch(text)
+                    : parseJsonBatch(text);
+                setBatchItems(items, file.name);
+            } catch (error) {
+                setBatchError(error);
+            }
+        });
+
+        batchOutput.addEventListener('change', () => {
+            const tripleOption = batchFormat.querySelector('option[value="a4-triple"]');
+            tripleOption.disabled = batchOutput.value === 'zip';
+            if (tripleOption.disabled && batchFormat.value === 'a4-triple') batchFormat.value = 'a4';
+        });
+
+        generateBatchButton.addEventListener('click', async () => {
+            if (!batchItems.length) return;
+            generateBatchButton.disabled = true;
+            clearResult();
+            setStatus('Preverjam podatke in ustvarjam datoteko …');
+            try {
+                const response = await fetch('/api/batch', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        nalogi: batchItems,
+                        merge: batchOutput.value === 'pdf',
+                        format: batchFormat.value
+                    })
+                });
+                if (!response.ok) {
+                    setStatus(`API je zavrnil zahtevek:\n${await responseError(response)}`, 'error');
+                    return;
+                }
+
+                const blob = await response.blob();
+                const isZip = response.headers.get('content-type')?.includes('application/zip');
+                const filename = isZip ? 'upn-nalogi-batch.zip' : 'upn-nalogi-batch.pdf';
+                showResult(blob, filename, isZip ? 'application/zip' : 'application/pdf');
+                setStatus(`Uspešno ustvarjenih ${batchItems.length} nalogov.`, 'success');
+            } catch (error) {
+                setStatus(`Napaka pri povezavi z API-jem: ${error.message}`, 'error');
+            } finally {
+                generateBatchButton.disabled = batchItems.length === 0;
+            }
+        });
+
+        if (location.protocol === 'file:') {
+            setBatchError(new Error('Zaženi lokalni API in odpri http://127.0.0.1:3000; HTML datoteke ne odpiraj neposredno.'));
+        } else {
+            document.getElementById('loadSampleBtn').click();
+        }
+    </script>
+</body>
+</html>

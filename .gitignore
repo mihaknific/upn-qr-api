@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Internal notes & plans
+PLAN.md
+scratch/
+.local/
+_site/
+render.yaml
+docs/NAČRT-VEČ-UPN-NALOGOV.md
+docs/OBJAVA-IN-NASLEDNJI-KORAKI.md

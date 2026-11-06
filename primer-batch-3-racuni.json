@@ -1,0 +1,50 @@
+[
+  {
+    "amount": "149.90",
+    "payerName": "TESTNI PLACNIK 1",
+    "payerAddress": "TESTNA ULICA 1",
+    "payerPlace": "1000 LJUBLJANA",
+    "recipientName": "TESTNI PREJEMNIK D.O.O.",
+    "recipientAddress": "TESTNA CESTA 2",
+    "recipientPlace": "1000 LJUBLJANA",
+    "recipientIban": "SI83000000000000000",
+    "recipientRefCode": "SI00",
+    "recipientRef": "2026-1001",
+    "purposeCode": "GDSV",
+    "purpose": "TESTNI PODATKI - NE PLACAJ",
+    "paymentDate": "2026-11-05",
+    "dueDate": "2026-11-20"
+  },
+  {
+    "amount": "45.00",
+    "payerName": "TESTNI PLACNIK 2",
+    "payerAddress": "TESTNA ULICA 3",
+    "payerPlace": "1000 LJUBLJANA",
+    "recipientName": "TESTNI PREJEMNIK D.O.O.",
+    "recipientAddress": "TESTNA CESTA 2",
+    "recipientPlace": "2000 MARIBOR",
+    "recipientIban": "SI83000000000000000",
+    "recipientRefCode": "SI00",
+    "recipientRef": "2026-1002",
+    "purposeCode": "ELEC",
+    "purpose": "TESTNI PODATKI - NE PLACAJ",
+    "paymentDate": "2026-11-05",
+    "dueDate": "2026-11-20"
+  },
+  {
+    "amount": "210.50",
+    "payerName": "TESTNI PLACNIK 3",
+    "payerAddress": "TESTNA ULICA 4",
+    "payerPlace": "2000 MARIBOR",
+    "recipientName": "TESTNI PREJEMNIK D.O.O.",
+    "recipientAddress": "TESTNA CESTA 2",
+    "recipientPlace": "3000 CELJE",
+    "recipientIban": "SI83000000000000000",
+    "recipientRefCode": "SI00",
+    "recipientRef": "2026-1003",
+    "purposeCode": "OTHR",
+    "purpose": "TESTNI PODATKI - NE PLACAJ",
+    "paymentDate": "2026-11-05",
+    "dueDate": "2026-11-20"
+  }
+]

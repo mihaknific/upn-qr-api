@@ -1,0 +1,16 @@
+{
+  "amount": "149.90",
+  "payerName": "TESTNI PLACNIK",
+  "payerAddress": "TESTNA ULICA 1",
+  "payerPlace": "1000 LJUBLJANA",
+  "recipientName": "TESTNI PREJEMNIK D.O.O.",
+  "recipientAddress": "TESTNA CESTA 2",
+  "recipientPlace": "1000 LJUBLJANA",
+  "recipientIban": "SI83000000000000000",
+  "recipientRefCode": "SI00",
+  "recipientRef": "2026-1001",
+  "purposeCode": "GDSV",
+  "purpose": "TESTNI PODATKI - NE PLACAJ",
+  "paymentDate": "2026-11-05",
+  "dueDate": "2026-11-20"
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="sl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Brezplačen UPN QR in SEPA EPC QR tester, ki podatke obdela lokalno v brskalniku.">
+    <title>UPN QR Studio — samostojen tester</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./app.js" defer></script>
+</head>
+<body>
+    <main class="page">
+        <header class="intro">
+            <p class="eyebrow">UPN QR STUDIO</p>
+            <h1>Ustvari UPN QR ali PDF nalog</h1>
+            <p>Vnesite podatke, izberite rezultat in ga ustvarite neposredno v brskalniku.</p>
+            <p class="privacy"><strong>Zasebnost:</strong> stran podatke obdela v tej napravi. Ne pošilja jih API-ju ali drugemu strežniku.</p>
+        </header>
+
+        <form id="paymentForm" novalidate>
+            <section class="panel" aria-labelledby="paymentHeading">
+                <h2 id="paymentHeading">Plačilo</h2>
+                <div class="fields">
+                    <label>Znesek (EUR)<input id="amount" name="amount" inputmode="decimal" value="150.00" autocomplete="off"></label>
+                    <label>Koda namena<input id="purposeCode" name="purposeCode" value="OTHR" maxlength="4" autocomplete="off"></label>
+                    <label class="wide">Namen plačila<input id="purpose" name="purpose" value="TESTNI PODATKI - NE PLACAJ" autocomplete="off"></label>
+                    <label>Datum plačila<input id="paymentDate" name="paymentDate" type="date"></label>
+                    <label>Rok plačila<input id="dueDate" name="dueDate" type="date"></label>
+                    <label>Vrsta naloga
+                        <select id="mode" name="mode">
+                            <option value="placilo">Plačilo</option>
+                            <option value="polog">Polog</option>
+                            <option value="dvig">Dvig</option>
+                            <option value="humanitarno">Humanitarni nalog</option>
+                        </select>
+                    </label>
+                    <label class="check"><input id="urgent" name="urgent" type="checkbox"> Nujno plačilo</label>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="payerHeading">
+                <h2 id="payerHeading">Plačnik</h2>
+                <div class="fields">
+                    <label>Ime ali naziv<input id="payerName" name="payerName" value="TESTNI PLACNIK" autocomplete="off"></label>
+                    <label>Ulica in hišna številka<input id="payerAddress" name="payerAddress" value="Testna ulica 1" autocomplete="off"></label>
+                    <label>Poštna številka in kraj<input id="payerCity" name="payerCity" value="1000 Ljubljana" autocomplete="off"></label>
+                    <label>IBAN plačnika (po potrebi)<input id="payerIban" name="payerIban" autocomplete="off"></label>
+                    <label>Model sklica plačnika<input id="payerRefCode" name="payerRefCode" placeholder="npr. SI00" autocomplete="off"></label>
+                    <label>Sklic plačnika<input id="payerRef" name="payerRef" autocomplete="off"></label>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="recipientHeading">
+                <h2 id="recipientHeading">Prejemnik</h2>
+                <div class="fields">
+                    <label>Ime ali naziv<input id="recipientName" name="recipientName" value="TESTNI PREJEMNIK D.O.O." autocomplete="off"></label>
+                    <label>Ulica in hišna številka<input id="recipientAddress" name="recipientAddress" value="Testna cesta 2" autocomplete="off"></label>
+                    <label>Poštna številka in kraj<input id="recipientCity" name="recipientCity" value="1000 Ljubljana" autocomplete="off"></label>
+                    <label>IBAN prejemnika<input id="recipientIban" name="recipientIban" value="SI83000000000000000" autocomplete="off"></label>
+                    <label>Model sklica prejemnika<input id="recipientRefCode" name="recipientRefCode" value="SI00" autocomplete="off"></label>
+                    <label>Sklic prejemnika<input id="recipientRef" name="recipientRef" value="1234" autocomplete="off"></label>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="epcHeading">
+                <h2 id="epcHeading">Dodatno za SEPA EPC QR</h2>
+                <div class="fields">
+                    <label>BIC (neobvezno)<input id="epcBic" name="epcBic" autocomplete="off"></label>
+                    <label>Dodatne informacije (neobvezno)<input id="epcInformation" name="epcInformation" autocomplete="off"></label>
+                </div>
+            </section>
+
+            <section class="panel actions" aria-labelledby="outputHeading">
+                <h2 id="outputHeading">Ustvari rezultat</h2>
+                <label class="format">Format PDF
+                    <select id="pdfFormat" name="pdfFormat">
+                        <option value="exact">UPN, 210 × 99 mm</option>
+                        <option value="a4">A4, nalog na dnu strani</option>
+                    </select>
+                </label>
+                <div class="buttons">
+                    <button class="button primary" id="generatePdf" type="button">Ustvari PDF</button>
+                    <button class="button" id="generateUpnQr" type="button">Ustvari UPN QR</button>
+                    <button class="button secondary" id="generateEpcQr" type="button">Ustvari SEPA EPC QR</button>
+                </div>
+            </section>
+        </form>
+
+        <section class="panel result" aria-labelledby="previewHeading">
+            <h2 id="previewHeading">Predogled</h2>
+            <p id="message" class="message" role="status" aria-live="polite">Vnesite podatke in izberite, kaj želite ustvariti.</p>
+            <div id="preview" class="preview">
+                <p class="empty">PDF ali QR koda se bo prikazala tukaj, pod obrazcem.</p>
+                <iframe id="pdfPreview" title="Predogled UPN PDF" hidden></iframe>
+                <img id="qrPreview" alt="Ustvarjena QR koda" hidden>
+            </div>
+            <a id="download" class="download" hidden>Stisnite za prenos datoteke</a>
+        </section>
+        <footer>
+            Preverite podatke in združljivost plačilnega naloga pri svoji banki. Vzorčni podatki so testni.
+            <a href="./third-party-notices.html">Obvestila o licencah vključenih knjižnic</a>
+        </footer>
+    </main>
+</body>
+</html>
